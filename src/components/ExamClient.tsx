@@ -323,9 +323,17 @@ export default function ExamClient({ exam }: { exam: Exam }) {
                 <div className="p-5 sm:p-6">
                   <div className="flex flex-col gap-5">
                     <div className="flex-1 min-w-0">
-                      <div className="text-base sm:text-lg font-bold text-white mb-6 leading-relaxed flex gap-3">
-                        <span className="text-indigo-400 opacity-60 shrink-0">Q{virtualRow.index + 1}.</span>
-                        <MarkdownRenderer content={q.questionText} />
+                      <div className="flex items-start justify-between gap-4 mb-6">
+                        <div className="text-base sm:text-lg font-bold text-white leading-relaxed flex gap-3">
+                          <span className="text-indigo-400 opacity-60 shrink-0">Q{virtualRow.index + 1}.</span>
+                          <MarkdownRenderer content={q.questionText} />
+                        </div>
+                        {isSubmitted && !selectedAnswer && (
+                          <div className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-widest mt-1">
+                            <XCircle className="w-3 h-3" />
+                            Skipped
+                          </div>
+                        )}
                       </div>
 
                       {/* Question image */}
