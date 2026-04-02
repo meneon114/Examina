@@ -255,7 +255,7 @@ export default function TeacherPortal() {
       </div>
 
       {isCreating && examData && (
-        <div className="bg-[#1e293b] border border-[#6366f1]/50 shadow-[0_0_20px_rgba(57,255,20,0.1)] rounded-lg p-6">
+        <div className="bg-[#1e293b] border border-[#6366f1]/50 shadow-[0_0_20px_rgba(99,102,241,0.1)] rounded-lg p-6">
           <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
             <h3 className="text-2xl font-bold text-[#6366f1] uppercase tracking-wider">
               {editingId ? "Edit Exam" : "Build New Exam"}
@@ -405,7 +405,7 @@ export default function TeacherPortal() {
             <button
               onClick={handleSaveExam}
               disabled={loading || !!jsonError}
-              className="flex items-center px-10 py-3 bg-[#6366f1] text-white font-black rounded hover:shadow-[0_0_20px_rgba(57,255,20,0.6)] focus:outline-none transition uppercase tracking-widest disabled:opacity-50"
+              className="flex items-center px-10 py-3 bg-[#6366f1] text-white font-black rounded hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] focus:outline-none transition uppercase tracking-widest disabled:opacity-50"
             >
               <Save className="w-5 h-5 mr-3" />
               {loading ? "Saving..." : (editingId ? "Save Changes" : "Publish Exam")}
@@ -442,7 +442,7 @@ export default function TeacherPortal() {
                         <div className="px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest border border-indigo-500/20 shadow-lg shadow-indigo-500/5 transition-transform group:scale-110">
                           Curriculum
                         </div>
-                        <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex space-x-1 transition-opacity">
                           <button 
                             onClick={() => handleEdit(exam)}
                             className="p-1.5 text-amber-400 hover:bg-amber-400/10 rounded transition-all"
@@ -452,7 +452,7 @@ export default function TeacherPortal() {
                           </button>
                         </div>
                       </div>
-                      <h3 className="text-lg font-bold text-white mb-2 leading-snug group-hover:text-indigo-400 transition-colors uppercase tracking-tight">{exam.examTitle}</h3>
+                      <h3 className="text-lg font-bold text-white mb-2 leading-snug transition-colors uppercase tracking-tight">{exam.examTitle}</h3>
                       <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed mb-6 italic">"{exam.examDescription}"</p>
                     </div>
                     
@@ -509,7 +509,7 @@ export default function TeacherPortal() {
                         else if (p < 80) badgeClass = "bg-[#f59e0b]/10 text-[#f59e0b] border-[#f59e0b]/30";
 
                         return (
-                          <tr key={index} onClick={() => window.location.href = `/result/${res.id}`} className="border-b border-slate-800/50 hover:bg-[#6366f1]/5 cursor-pointer transition-colors group">
+                          <tr key={index} onClick={() => window.location.href = `/result/${res.id}`} className="border-b border-slate-800/50 cursor-pointer transition-colors group">
                             <td className="px-6 py-5 font-mono">
                               <div className="flex items-center text-slate-200 truncate font-bold">
                                 <User className="w-4 h-4 mr-2 text-slate-500" />
@@ -529,13 +529,13 @@ export default function TeacherPortal() {
                               {new Date(res.submittedAt).toLocaleDateString()} {new Date(res.submittedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                             </td>
                             <td className="px-6 py-5 text-right">
-                               <button 
-                                  onClick={(e) => handleDeleteResult(res.id as string, e)}
-                                  className="p-2 text-[#ef4444] opacity-0 group-hover:opacity-100 hover:bg-[#ef4444] hover:text-white rounded transition"
-                                  title="Delete Record"
-                               >
-                                  <Trash2 className="w-4 h-4" />
-                               </button>
+                                <button 
+                                   onClick={(e) => handleDeleteResult(res.id as string, e)}
+                                   className="p-2 text-[#ef4444] hover:bg-[#ef4444] hover:text-white rounded transition"
+                                   title="Delete Record"
+                                >
+                                   <Trash2 className="w-4 h-4" />
+                                </button>
                             </td>
                           </tr>
                         );

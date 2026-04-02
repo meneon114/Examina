@@ -42,7 +42,7 @@ export default function Home() {
             href="https://github.com/meneon114"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#8b90a8] hover:text-[#818cf8] transition-colors underline underline-offset-4"
+            className="text-[#8b90a8] transition-colors underline underline-offset-4"
           >
             Md. Rijun Islam Neon
           </a>

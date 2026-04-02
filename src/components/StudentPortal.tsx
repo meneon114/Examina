@@ -98,7 +98,7 @@ export default function StudentPortal() {
                     )}
                     style={{ animationDelay: `${i * 0.1}s` }}
                   >
-                    <div className="card p-6 h-full flex flex-col justify-between group cursor-pointer border-indigo-500/10 hover:border-indigo-500/40">
+                    <div className="card p-6 h-full flex flex-col justify-between group cursor-pointer border-indigo-500/10">
                       <div>
                         <div className="flex items-start justify-between mb-4">
                           <div className={clsx(
@@ -111,7 +111,7 @@ export default function StudentPortal() {
                             {exam.questions.length} Questions
                           </span>
                         </div>
-                        <h3 className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors mb-2 leading-tight">
+                        <h3 className="text-lg font-bold text-white transition-colors mb-2 leading-tight">
                           {exam.examTitle}
                         </h3>
                         <p className="text-sm text-slate-400 line-clamp-3 leading-relaxed">
@@ -119,9 +119,9 @@ export default function StudentPortal() {
                         </p>
                       </div>
 
-                      <div className="mt-6 flex items-center text-sm font-bold text-indigo-400 group-hover:gap-2 transition-all">
+                      <div className="mt-6 flex items-center text-sm font-bold text-indigo-400 transition-all">
                         {isDone ? "Retake" : "Start"}
-                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <ChevronRight className="w-4 h-4 transition-transform" />
                       </div>
                     </div>
                   </Link>
@@ -135,8 +135,8 @@ export default function StudentPortal() {
       {/* ── My Results ── */}
       <section>
         <div className="flex items-center gap-4 mb-8 px-1">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-            <Award className="w-5 h-5 text-emerald-400" />
+          <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20 shadow-xl shadow-violet-500/5">
+            <Award className="w-5 h-5 text-violet-400" />
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white tracking-tight">Previous Results</h2>
@@ -154,9 +154,9 @@ export default function StudentPortal() {
             <div className="flex gap-6 overflow-x-auto pb-8 pt-2 scrollbar-hide snap-x snap-mandatory px-1 scroll-smooth">
               {results.map((res, i) => {
                 const p = Math.round((res.score / res.totalQuestions) * 100);
-                const statusColor = p >= 80 ? "text-emerald-400" : p >= 50 ? "text-amber-400" : "text-rose-400";
-                const bgColor = p >= 80 ? "bg-emerald-400/10" : p >= 50 ? "bg-amber-400/10" : "bg-rose-400/10";
-                const borderColor = p >= 80 ? "border-emerald-400/20" : p >= 50 ? "border-amber-400/20" : "border-rose-400/20";
+                const statusColor = p >= 80 ? "text-violet-400" : p >= 50 ? "text-amber-400" : "text-rose-400";
+                const bgColor = p >= 80 ? "bg-violet-400/10" : p >= 50 ? "bg-amber-400/10" : "bg-rose-400/10";
+                const borderColor = p >= 80 ? "border-violet-400/20" : p >= 50 ? "border-amber-400/20" : "border-rose-400/20";
 
                 return (
                   <Link
@@ -165,9 +165,9 @@ export default function StudentPortal() {
                     className="flex-none w-[280px] sm:w-[320px] snap-start animate-reveal"
                     style={{ animationDelay: `${(i + exams.length) * 0.1}s` }}
                   >
-                    <div className="card p-6 flex flex-col group cursor-pointer relative border-white/5 hover:border-indigo-500/40">
+                    <div className="card p-6 flex flex-col group cursor-pointer relative border-white/5">
                       <div className="flex justify-between items-start mb-6">
-                        <h3 className="font-bold text-white line-clamp-1 pr-4 group-hover:text-indigo-400 transition-colors text-sm">
+                        <h3 className="font-bold text-white line-clamp-1 pr-4 transition-colors text-sm">
                           {res.examTitle}
                         </h3>
                         <div className={`px-2 py-1 rounded-md border text-[11px] font-black tracking-widest ${bgColor} ${statusColor} ${borderColor}`}>
@@ -179,7 +179,7 @@ export default function StudentPortal() {
                         {/* Score bar */}
                         <div className="w-full bg-slate-900/50 rounded-full h-1.5 overflow-hidden border border-white/5">
                           <div
-                            className={`h-full rounded-full transition-all duration-1000 ${p >= 80 ? "bg-emerald-500" : p >= 50 ? "bg-amber-500" : "bg-rose-500"}`}
+                            className={`h-full rounded-full transition-all duration-1000 ${p >= 80 ? "bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.3)]" : p >= 50 ? "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]" : "bg-rose-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]"}`}
                             style={{ width: `${p}%` }}
                           />
                         </div>
@@ -194,7 +194,7 @@ export default function StudentPortal() {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-indigo-400 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1">
+                        <div className="flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-indigo-400 transition-all transform">
                           Review Detail
                           <ChevronRight className="w-3 h-3" />
                         </div>

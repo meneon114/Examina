@@ -6,11 +6,11 @@ import {
   XCircle,
   Lightbulb,
   ArrowLeft,
-  Loader2,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MarkdownRenderer from "./MarkdownRenderer";
 
 type ExplanationState = { text: string; loading: boolean; error?: string };
@@ -25,6 +25,8 @@ export default function ResultClient({
   const [explanations, setExplanations] = useState<Record<string, ExplanationState>>({});
   const answers = result.studentAnswers || {};
   const pct = Math.round((result.score / result.totalQuestions) * 100);
+
+
 
   const handleExplain = async (
     qId: string | number,
@@ -107,7 +109,7 @@ export default function ResultClient({
                     </div>
 
                     {q.imageUrl && (
-                      <div className="mb-6 rounded-2xl overflow-hidden border border-white/5 bg-slate-900/50 p-4 transition-all hover:bg-slate-900/80">
+                      <div className="mb-6 rounded-2xl overflow-hidden border border-white/5 bg-slate-900/50 p-4 transition-all">
                         <img
                           src={q.imageUrl}
                           alt={`Visual aid for Q${idx+1}`}
@@ -131,9 +133,9 @@ export default function ResultClient({
                               {
                                 "border-white/5 bg-slate-900/30 opacity-60":
                                   state === "default",
-                                "border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.1)]":
+                                "border-emerald-500/50 bg-emerald-500/10":
                                   state === "correct",
-                                "border-rose-500/50 bg-rose-500/10 shadow-[0_0_15px_rgba(239,68,68,0.1)]":
+                                "border-rose-500/50 bg-rose-500/10":
                                   state === "incorrect",
                               }
                             )}

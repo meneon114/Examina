@@ -28,15 +28,12 @@ export default function Navbar() {
             <>
               {/* Logo */}
               <Link href="/" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-xl shadow-indigo-500/20 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-xl shadow-indigo-500/20 transition-transform duration-300">
                   <GraduationCap className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-lg font-bold text-white tracking-tight leading-none uppercase">
                     Examina
-                  </span>
-                  <span className="text-[9px] text-indigo-400 uppercase tracking-[0.3em] font-black opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    Studio
                   </span>
                 </div>
               </Link>

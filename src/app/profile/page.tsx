@@ -51,7 +51,7 @@ export default function ProfilePage() {
     return (
       <div className="text-center py-20 text-slate-400 font-mono">
         <p>You must be signed in to view this page.</p>
-        <Link href="/" className="text-[#6366f1] hover:underline mt-4 inline-block">Return Home</Link>
+        <Link href="/" className="text-[#6366f1] mt-4 inline-block">Return Home</Link>
       </div>
     );
   }
@@ -59,7 +59,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6">
       <div className="mb-8 flex items-center">
-        <Link href="/" className="inline-flex items-center text-slate-400 hover:text-[#6366f1] transition-colors font-bold uppercase text-sm tracking-widest mr-auto">
+        <Link href="/" className="inline-flex items-center text-slate-400 transition-colors font-bold uppercase text-sm tracking-widest mr-auto">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Dashboard
         </Link>
@@ -73,7 +73,7 @@ export default function ProfilePage() {
         
         <div className="px-8 pb-8 relative">
           <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-12 mb-8 gap-6">
-            <div className="w-24 h-24 rounded-full bg-[#0f172a] border-4 border-[#1e293b] flex items-center justify-center relative shadow-[0_0_20px_rgba(57,255,20,0.2)]">
+            <div className="w-24 h-24 rounded-full bg-[#0f172a] border-4 border-[#1e293b] flex items-center justify-center relative">
               <UserIcon className="w-12 h-12 text-[#6366f1]" />
             </div>
             

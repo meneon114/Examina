@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Exam } from "@/lib/types";
 import { useAuth } from "@/components/AuthProvider";
 import { saveExamResult } from "@/lib/db";
@@ -12,14 +12,12 @@ import {
   Loader2,
   Clock,
   ChevronRight,
-  ArrowUp,
   Home
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { useRef, useMemo } from "react";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { useExamHeader } from "./ExamHeaderContext";
 
@@ -34,7 +32,6 @@ export default function ExamClient({ exam }: { exam: Exam }) {
   const [score, setScore] = useState(0);
   const [explanations, setExplanations] = useState<Record<string, ExplanationState>>({});
   const [timeLeft, setTimeLeft] = useState(exam.questions.length * 60);
-  const [showGoTop, setShowGoTop] = useState(false);
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -45,23 +42,53 @@ export default function ExamClient({ exam }: { exam: Exam }) {
     overscan: 5,
   });
 
-  useEffect(() => {
-    const handleScroll = () => setShowGoTop(window.scrollY > 500);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+
 
   const handleOptionSelect = (qId: string | number, option: string) => {
     if (isSubmitted) return;
     setAnswers((prev) => ({ ...prev, [String(qId)]: option }));
   };
 
+  const workerRef = useRef<Worker | null>(null);
+
   useEffect(() => {
-    if (isSubmitted) return;
-    if (timeLeft <= 0) { handleSubmit(); return; }
-    const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft, isSubmitted]);
+    if (isSubmitted) {
+      workerRef.current?.terminate();
+      workerRef.current = null;
+      return;
+    }
+
+    if (timeLeft <= 0) {
+      handleSubmit();
+      return;
+    }
+
+    // Initialize worker
+    const worker = new Worker(new URL("../lib/timerWorker.ts", import.meta.url));
+    workerRef.current = worker;
+
+    worker.onmessage = (e: MessageEvent) => {
+      if (e.data === "tick") {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            worker.terminate();
+            workerRef.current = null;
+            if (prev === 1) handleSubmit();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }
+    };
+
+    worker.postMessage("start");
+
+    return () => {
+      worker.terminate();
+      workerRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSubmitted]);
 
   const answeredCount = Object.keys(answers).length;
 
@@ -136,7 +163,7 @@ export default function ExamClient({ exam }: { exam: Exam }) {
     return (
       <div className="text-center py-16">
         <p className="text-lg text-[#8b90a8] mb-4">You need to sign in to take this exam.</p>
-        <Link href="/" className="text-[#818cf8] hover:underline">
+        <Link href="/" className="text-[#818cf8]">
           Return to Home
         </Link>
       </div>
@@ -247,7 +274,7 @@ export default function ExamClient({ exam }: { exam: Exam }) {
                               className={clsx(
                                 "flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 group/opt",
                                 {
-                                  "border-white/5 bg-slate-900/30 hover:border-indigo-500/30 hover:bg-indigo-500/5":
+                                  "border-white/5 bg-slate-900/30":
                                     state === "default" && !isSubmitted,
                                   "border-white/5 bg-slate-900/10 opacity-60 cursor-not-allowed":
                                     state === "default" && isSubmitted,
@@ -271,7 +298,7 @@ export default function ExamClient({ exam }: { exam: Exam }) {
                               />
                               <div
                                 className={clsx("flex-1 text-sm font-bold tracking-tight transition-colors", {
-                                  "text-slate-400 group-hover/opt:text-slate-200": state === "default",
+                                  "text-slate-400": state === "default",
                                   "text-indigo-300": state === "selected",
                                   "text-emerald-400": state === "correct",
                                   "text-rose-400": state === "incorrect",
@@ -353,16 +380,6 @@ export default function ExamClient({ exam }: { exam: Exam }) {
           )}
         </div>
 
-      {/* Floating Go to Top Button */}
-      {showGoTop && (
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-indigo-600 text-white shadow-2xl flex items-center justify-center hover:bg-indigo-500 transition-all animate-reveal z-50 ring-4 ring-indigo-500/20"
-          aria-label="Go to top"
-        >
-          <ArrowUp className="w-6 h-6" />
-        </button>
-      )}
     </div>
   );
 }
