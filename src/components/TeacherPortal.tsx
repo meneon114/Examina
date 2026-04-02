@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "./AuthProvider";
 import { Exam, Question, ExamResult } from "@/lib/types";
 import { saveExam, getTeacherExams, deleteExam, updateExam, getAllResults, deleteResult } from "@/lib/db";
-import { FileUp, Save, X, PlusCircle, Trash2, Edit, Activity, User, Award, Calendar, Image as ImageIcon } from "lucide-react";
+import { FileUp, Save, X, PlusCircle, Trash2, Edit, Activity, User, Award, Calendar, Image as ImageIcon, BookOpen, ChevronRight, ClipboardList } from "lucide-react";
 
 const getEmptyExam = (email: string): Omit<Exam, "id"> => ({
   examTitle: "",
@@ -236,128 +236,139 @@ export default function TeacherPortal() {
   return (
     <div className="space-y-12 pb-12 animate-reveal">
       {/* HEADER SECTION */}
-      <div className="flex justify-between items-center pb-6 border-b border-white/5">
-        <div>
-          <h2 className="text-3xl font-bold text-white tracking-tight uppercase">
-            Teacher Dashboard
-          </h2>
-          <p className="text-sm text-slate-500 font-medium">Manage your exams and see how your students are doing.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-xl shadow-indigo-500/5 transition-all">
+            <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Teacher Dashboard</h1>
+            <p className="text-xs sm:text-sm text-slate-400">Manage assessments and track student progress.</p>
+          </div>
         </div>
         {!isCreating && (
           <button
             onClick={handleCreateNew}
-            className="btn-primary"
+            className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
           >
             <PlusCircle className="w-5 h-5" />
-            New Assessment
+            Create Exam
           </button>
         )}
       </div>
 
       {isCreating && examData && (
-        <div className="bg-[#1e293b] border border-[#6366f1]/50 shadow-[0_0_20px_rgba(99,102,241,0.1)] rounded-lg p-6">
-          <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
-            <h3 className="text-2xl font-bold text-[#6366f1] uppercase tracking-wider">
-              {editingId ? "Edit Exam" : "Build New Exam"}
-            </h3>
-            <button onClick={resetForm} className="text-[#ef4444] hover:text-white bg-[#ef4444]/10 hover:bg-[#ef4444] p-1.5 rounded transition font-bold uppercase text-sm tracking-wide flex items-center">
-              <X className="w-4 h-4 mr-1" /> Close
+        <div className="bg-[#1e293b]/50 border border-white/5 backdrop-blur-xl shadow-2xl rounded-2xl p-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+            <div>
+              <h3 className="text-2xl font-bold text-white tracking-tight">
+                {editingId ? "Edit Assessment" : "Build New Assessment"}
+              </h3>
+              <p className="text-sm text-slate-400 mt-1">Design your questions and publish them to students.</p>
+            </div>
+            <button 
+              onClick={resetForm} 
+              className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-xl transition-all font-bold text-sm"
+            >
+              <X className="w-4 h-4" /> Discard Changes
             </button>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
             
             {/* VISUAL BUILDER (LEFT) */}
-            <div className="space-y-6 max-h-[800px] overflow-y-auto pr-4 custom-scrollbar">
-              <div className="bg-slate-900 p-5 rounded-lg border border-slate-800">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-bold text-[#6366f1] mb-2 uppercase tracking-wide">Exam Title</label>
+            <div className="space-y-8 max-h-[800px] overflow-y-auto pr-4 scrollbar-hide">
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-black text-slate-500 mb-3 uppercase tracking-[0.2em]">Exam Identity</label>
+                  <div className="space-y-4">
                     <input 
                       type="text" 
-                      className="w-full bg-[#0f172a] text-white border border-slate-700 rounded p-2 focus:border-[#6366f1] focus:outline-none transition-colors"
+                      className="w-full bg-slate-900/50 text-white border border-white/5 rounded-xl p-4 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all placeholder:text-slate-600 font-medium"
                       value={examData.examTitle}
                       onChange={(e) => handleExamFieldChange("examTitle", e.target.value)}
-                      placeholder="e.g. Midterm Computer Science"
+                      placeholder="e.g. Advanced Quantum Mechanics"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-[#6366f1] mb-2 uppercase tracking-wide">Description</label>
                     <textarea 
-                      className="w-full bg-[#0f172a] text-white border border-slate-700 rounded p-2 focus:border-[#6366f1] focus:outline-none transition-colors h-24"
+                      className="w-full bg-slate-900/50 text-white border border-white/5 rounded-xl p-4 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all h-32 placeholder:text-slate-600 font-medium resize-none"
                       value={examData.examDescription}
                       onChange={(e) => handleExamFieldChange("examDescription", e.target.value)}
-                      placeholder="Brief instructions for the students..."
+                      placeholder="Provide brief instructions or context for the assessment..."
                     />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-slate-100 text-lg uppercase tracking-wide">Questions ({examData.questions.length})</h4>
+                <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                  <h4 className="font-bold text-white tracking-tight">Question Pool ({examData.questions.length})</h4>
                   <button 
                     onClick={handleAddQuestion}
-                    className="flex items-center px-4 py-2 bg-[#6366f1]/20 text-[#6366f1] hover:bg-[#6366f1] hover:text-white rounded text-sm font-bold uppercase transition-all"
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl text-xs font-bold transition-all border border-indigo-500/20"
                   >
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Add MCQ
+                    <PlusCircle className="w-4 h-4" />
+                    Add Unit
                   </button>
                 </div>
 
                 {examData.questions.map((q, qIdx) => (
-                  <div key={q.id} className="bg-slate-900 p-5 rounded-lg border border-slate-700 relative group">
+                  <div key={q.id} className="bg-slate-900/40 p-6 rounded-2xl border border-white/5 relative group/q transition-all hover:border-indigo-500/20">
                     <button 
                       onClick={() => handleRemoveQuestion(qIdx)}
-                      className="absolute top-4 right-4 text-slate-500 hover:text-[#ef4444] transition"
+                      className="absolute top-6 right-6 text-slate-600 hover:text-rose-500 transition-colors"
                       title="Remove Question"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
                     
-                    <h5 className="text-[#f59e0b] font-bold mb-4">Question {qIdx + 1}</h5>
+                    <div className="flex items-center gap-2 mb-6">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xs font-black">
+                        #{qIdx + 1}
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Assessment Unit</span>
+                    </div>
                     
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       <div>
                         <input 
                           type="text" 
-                          className="w-full bg-[#0f172a] text-white border border-slate-700 rounded p-2 focus:border-[#6366f1] focus:outline-none"
+                          className="w-full bg-slate-900/50 text-white border border-white/5 rounded-xl p-4 focus:border-indigo-500/50 focus:outline-none transition-all placeholder:text-slate-600 text-sm font-medium"
                           value={q.questionText}
                           onChange={(e) => handleQuestionChange(qIdx, "questionText", e.target.value)}
-                          placeholder="What is the capital of..."
+                          placeholder="Compose your question here..."
                         />
                       </div>
                       
-                      <div className="flex items-center space-x-2">
-                        <ImageIcon className="w-5 h-5 text-slate-500" />
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-slate-900/80 flex items-center justify-center border border-white/5">
+                          <ImageIcon className="w-4 h-4 text-slate-500" />
+                        </div>
                         <input 
                           type="text" 
-                          className="flex-1 bg-[#0f172a] text-white border border-slate-700 rounded p-2 text-sm focus:border-[#6366f1] focus:outline-none"
+                          className="flex-1 bg-slate-900/50 text-white border border-white/5 rounded-xl p-3 text-xs focus:border-indigo-500/50 focus:outline-none transition-all placeholder:text-slate-600"
                           value={q.imageUrl || ""}
                           onChange={(e) => handleQuestionChange(qIdx, "imageUrl", e.target.value)}
-                          placeholder="Optional: Image URL (e.g. https://example.com/image.png)"
+                          placeholder="Optional: Image URL (Reference material)"
                         />
                       </div>
 
-                      <div className="pt-2">
-                        <p className="text-xs text-slate-400 mb-2 uppercase tracking-wider font-bold">Options (Select the correct one)</p>
-                        <div className="grid grid-cols-1 gap-2">
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Options</p>
+                        <div className="grid grid-cols-1 gap-3">
                           {q.options.map((opt, oIdx) => (
-                            <div key={oIdx} className="flex items-center space-x-3">
-                              <input 
-                                type="radio" 
-                                name={`correct-${q.id}`}
-                                className="w-5 h-5 text-[#6366f1] focus:ring-[#6366f1] bg-slate-900 border-slate-600 cursor-pointer"
-                                checked={opt !== "" && q.correctAnswer === opt}
-                                onChange={() => handleQuestionChange(qIdx, "correctAnswer", opt)}
-                                title="Mark as correct answer"
-                              />
+                            <div key={oIdx} className="flex items-center gap-3">
+                              <button
+                                onClick={() => handleQuestionChange(qIdx, "correctAnswer", opt)}
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all font-black text-xs ${opt !== "" && q.correctAnswer === opt ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-900/80 border-white/5 text-slate-600 hover:border-white/10'}`}
+                              >
+                                {["A", "B", "C", "D"][oIdx]}
+                              </button>
                               <input 
                                 type="text" 
-                                className={`flex-1 bg-[#0f172a] text-white border rounded p-2 text-sm focus:outline-none transition-colors ${q.correctAnswer === opt && opt !== "" ? 'border-[#6366f1] ring-1 ring-[#6366f1]' : 'border-slate-700 focus:border-slate-500'}`}
+                                className={`flex-1 bg-slate-900/50 text-white border rounded-xl p-4 text-sm font-medium focus:outline-none transition-all placeholder:text-slate-600 ${q.correctAnswer === opt && opt !== "" ? 'border-indigo-500/40 bg-indigo-500/5' : 'border-white/5 focus:border-white/10'}`}
                                 value={opt}
                                 onChange={(e) => handleOptionChange(qIdx, oIdx, e.target.value)}
-                                placeholder={`Option ${["A", "B", "C", "D"][oIdx]}`}
+                                placeholder={`Option ${["A", "B", "C", "D"][oIdx]}...`}
                               />
                             </div>
                           ))}
@@ -377,38 +388,42 @@ export default function TeacherPortal() {
 
             {/* JSON EDITOR (RIGHT) */}
             <div className="space-y-4 flex flex-col h-full">
-              <div className="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-800">
-                <label className="text-sm font-bold text-[#f59e0b] uppercase tracking-wide">JSON Code Editor</label>
-                <label className="flex items-center px-3 py-1.5 bg-[#0f172a] border border-slate-700 hover:border-[#6366f1]/50 hover:text-[#6366f1] rounded cursor-pointer transition text-xs font-bold text-slate-400">
+              <div className="flex justify-between items-center bg-slate-900/60 p-4 rounded-2xl border border-white/5">
+                <label className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Source Code</label>
+                <label className="flex items-center px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500 hover:text-white rounded-xl cursor-pointer transition-all text-[10px] font-bold text-indigo-400">
                   <FileUp className="w-3.5 h-3.5 mr-1.5" />
-                  Upload .json
+                  Import JSON
                   <input type="file" accept=".json" className="hidden" onChange={handleFileUpload} />
                 </label>
               </div>
 
               <textarea 
-                className="w-full flex-1 min-h-[500px] p-4 border border-slate-700 bg-[#0f172a] text-[#6366f1] rounded-md text-sm font-mono focus:ring-1 focus:ring-[#6366f1] focus:border-[#6366f1] focus:outline-none placeholder-slate-800 custom-scrollbar leading-relaxed" 
+                className="w-full flex-1 min-h-[500px] p-6 border border-white/5 bg-slate-950 text-indigo-400 rounded-2xl text-xs font-mono focus:ring-1 focus:ring-indigo-500/20 focus:outline-none placeholder-slate-800 scrollbar-hide leading-relaxed" 
                 value={jsonInput} 
                 onChange={handleJsonChange}
                 spellCheck={false}
               />
               
               {jsonError ? (
-                <p className="text-sm text-white bg-[#ef4444] p-3 rounded font-mono font-bold uppercase tracking-wider">{jsonError}</p>
+                <div className="text-[10px] text-rose-400 bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl font-bold uppercase tracking-wider flex items-center gap-2">
+                  <X className="w-3 h-3" /> {jsonError}
+                </div>
               ) : (
-                <p className="text-xs text-[#6366f1] font-mono select-none opacity-50">✓ JSON is valid and synced automatically.</p>
+                <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-2 px-1 opacity-60">
+                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live Sync Active
+                </div>
               )}
             </div>
           </div>
 
-          <div className="mt-8 flex justify-end bg-[#0f172a] p-4 rounded-lg border border-slate-800">
+          <div className="mt-12 flex justify-end">
             <button
               onClick={handleSaveExam}
               disabled={loading || !!jsonError}
-              className="flex items-center px-10 py-3 bg-[#6366f1] text-white font-black rounded hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] focus:outline-none transition uppercase tracking-widest disabled:opacity-50"
+              className="flex items-center gap-3 px-12 py-4 bg-indigo-500 hover:bg-indigo-600 text-white font-black rounded-2xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-30 disabled:grayscale"
             >
-              <Save className="w-5 h-5 mr-3" />
-              {loading ? "Saving..." : (editingId ? "Save Changes" : "Publish Exam")}
+              <Save className="w-5 h-5" />
+              {loading ? "Publishing…" : (editingId ? "Update Assessment" : "Publish Assessment")}
             </button>
           </div>
         </div>
@@ -429,122 +444,169 @@ export default function TeacherPortal() {
       ) : (
         <>
           {/* MANAGE EXAMS SECTION */}
-          <section className="mb-20">
-            <h3 className="text-sm font-black text-indigo-400 uppercase tracking-[0.3em] mb-8 pb-3 border-b border-white/5 inline-block">Your Created Exams ({exams.length})</h3>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {exams.length === 0 ? (
-                <p className="text-slate-500 col-span-full italic">You have not created any exams yet.</p>
-              ) : (
-                exams.map((exam) => (
-                  <div key={exam.id} className="card p-8 h-full flex flex-col justify-between group">
-                    <div>
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest border border-indigo-500/20 shadow-lg shadow-indigo-500/5 transition-transform group:scale-110">
-                          Curriculum
-                        </div>
-                        <div className="flex space-x-1 transition-opacity">
-                          <button 
-                            onClick={() => handleEdit(exam)}
-                            className="p-1.5 text-amber-400 hover:bg-amber-400/10 rounded transition-all"
-                            title="Edit"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <h3 className="text-lg font-bold text-white mb-2 leading-snug transition-colors uppercase tracking-tight">{exam.examTitle}</h3>
-                      <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed mb-6 italic">"{exam.examDescription}"</p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {exam.questions.length} Question Units
-                      </div>
-                      <button 
-                        onClick={() => handleDelete(exam.id)}
-                        className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"
-                        title="Delete Permanently"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
+          <section>
+            <div className="flex items-center justify-between mb-8 px-1">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                  <BookOpen className="w-5 h-5 text-indigo-400" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white tracking-tight">Your Exams</h2>
+                  <p className="text-sm text-slate-400">Content you've published.</p>
+                </div>
+              </div>
             </div>
+
+            {exams.length === 0 ? (
+              <div className="py-16 text-center card border-dashed">
+                <ClipboardList className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+                <p className="text-slate-500 font-medium">You haven't created any exams yet.</p>
+              </div>
+            ) : (
+              <div className="relative group/carousel">
+                <div className="flex gap-6 overflow-x-auto pb-8 pt-2 scrollbar-hide snap-x snap-mandatory px-1 scroll-smooth">
+                  {exams.map((exam, i) => (
+                    <div 
+                      key={exam.id} 
+                      className="animate-reveal flex-none w-[300px] sm:w-[350px] snap-start"
+                      style={{ animationDelay: `${i * 0.1}s` }}
+                    >
+                      <div className="card p-6 h-full flex flex-col justify-between group border-indigo-500/10">
+                        <div>
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                              Active
+                            </div>
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={() => handleEdit(exam)}
+                                className="p-2 text-slate-400 hover:text-amber-400 hover:bg-amber-400/10 rounded-lg transition-all"
+                                title="Edit Exam"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleDelete(exam.id)}
+                                className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"
+                                title="Delete Permanently"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                          <h3 className="text-lg font-bold text-white mb-2 leading-tight">
+                            {exam.examTitle}
+                          </h3>
+                          <p className="text-sm text-slate-400 line-clamp-3 leading-relaxed mb-4">
+                            {exam.examDescription}
+                          </p>
+                        </div>
+
+                        <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                          <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-slate-900/50 text-slate-400 border border-white/5">
+                            {exam.questions.length} Questions
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-medium">
+                            {new Date(exam.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
 
           {/* STUDENT ACTIVITY FEED */}
           <section>
-            <div className="pb-8 border-b border-white/5 mb-8">
-              <h2 className="text-3xl font-bold text-white tracking-tight uppercase">
-                Student Activity
-              </h2>
-              <p className="mt-2 text-sm text-slate-500 font-medium tracking-wide">Monitor recent exam submissions and scores from your students.</p>
+            <div className="flex items-center gap-4 mb-8 px-1">
+              <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20 shadow-xl shadow-violet-500/5">
+                <Award className="w-5 h-5 text-violet-400" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white tracking-tight">Student Submissions</h2>
+                <p className="text-sm text-slate-400">Recent performance across all exams.</p>
+              </div>
             </div>
 
-            <div className="glass-panel border-white/5 overflow-hidden shadow-2xl">
-              {results.length === 0 ? (
-                <div className="p-12 text-center text-slate-600 font-mono text-sm uppercase font-bold">
-                  <Activity className="w-10 h-10 mx-auto mb-4 opacity-50" />
-                  <p>No student results submitted yet.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm text-slate-300">
-                    <thead className="text-[10px] text-slate-500 uppercase bg-slate-900/50 border-b border-white/5 tracking-[0.2em] font-black">
-                      <tr>
-                        <th scope="col" className="px-8 py-5">Student Identity</th>
-                        <th scope="col" className="px-8 py-5">Assessment Unit</th>
-                        <th scope="col" className="px-8 py-5">Performance</th>
-                        <th scope="col" className="px-8 py-5">Timestamp</th>
-                        <th scope="col" className="px-8 py-5 text-right">Admin</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {results.map((res, index) => {
-                        const p = Math.round((res.score / res.totalQuestions) * 100);
-                        let badgeClass = "bg-[#6366f1]/10 text-[#6366f1] border-[#6366f1]/30";
-                        if (p < 50) badgeClass = "bg-[#ef4444]/10 text-[#ef4444] border-[#ef4444]/30";
-                        else if (p < 80) badgeClass = "bg-[#f59e0b]/10 text-[#f59e0b] border-[#f59e0b]/30";
+            {results.length === 0 ? (
+              <div className="py-16 text-center card border-dashed">
+                <Activity className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+                <p className="text-slate-500 font-medium">No students have submitted results yet.</p>
+              </div>
+            ) : (
+              <div className="relative group/carousel-results">
+                <div className="flex gap-6 overflow-x-auto pb-8 pt-2 scrollbar-hide snap-x snap-mandatory px-1 scroll-smooth">
+                  {results.map((res, i) => {
+                    const p = Math.round((res.score / res.totalQuestions) * 100);
+                    const statusColor = p >= 80 ? "text-violet-400" : p >= 50 ? "text-amber-400" : "text-rose-400";
+                    const bgColor = p >= 80 ? "bg-violet-400/10" : p >= 50 ? "bg-amber-400/10" : "bg-rose-400/10";
+                    const borderColor = p >= 80 ? "border-violet-400/20" : p >= 50 ? "border-amber-400/20" : "border-rose-400/20";
 
-                        return (
-                          <tr key={index} onClick={() => window.location.href = `/result/${res.id}`} className="border-b border-slate-800/50 cursor-pointer transition-colors group">
-                            <td className="px-6 py-5 font-mono">
-                              <div className="flex items-center text-slate-200 truncate font-bold">
-                                <User className="w-4 h-4 mr-2 text-slate-500" />
+                    return (
+                      <div
+                        key={res.id}
+                        className="flex-none w-[280px] sm:w-[320px] snap-start animate-reveal"
+                        style={{ animationDelay: `${(i + exams.length) * 0.1}s` }}
+                      >
+                        <div className="card p-6 flex flex-col group relative border-white/5">
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex flex-col gap-1 pr-2">
+                              <h3 className="font-bold text-white text-xs line-clamp-1">
                                 {res.studentEmail}
-                              </div>
-                            </td>
-                            <td className="px-6 py-5 font-bold line-clamp-2 min-w-[200px] text-slate-100 mt-1">{res.examTitle}</td>
-                            <td className="px-6 py-5">
-                              <div className="flex items-center">
-                                <div className={`px-2.5 py-1 rounded border font-mono tracking-widest text-xs font-bold mr-3 ${badgeClass}`}>
-                                  {p}%
-                                </div>
-                                <span className="text-slate-400 font-mono whitespace-nowrap">{res.score}/{res.totalQuestions}</span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-5 font-mono text-xs whitespace-nowrap text-slate-400">
-                              {new Date(res.submittedAt).toLocaleDateString()} {new Date(res.submittedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                            </td>
-                            <td className="px-6 py-5 text-right">
-                                <button 
-                                   onClick={(e) => handleDeleteResult(res.id as string, e)}
-                                   className="p-2 text-[#ef4444] hover:bg-[#ef4444] hover:text-white rounded transition"
-                                   title="Delete Record"
-                                >
-                                   <Trash2 className="w-4 h-4" />
-                                </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                              </h3>
+                              <p className="text-[10px] text-slate-500 font-medium line-clamp-1">
+                                {res.examTitle}
+                              </p>
+                            </div>
+                            <div className={`px-2 py-1 rounded-md border text-[11px] font-black tracking-widest ${bgColor} ${statusColor} ${borderColor}`}>
+                              {p}%
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="w-full bg-slate-900/50 rounded-full h-1.5 overflow-hidden border border-white/5">
+                              <div
+                                className={`h-full rounded-full transition-all duration-1000 ${p >= 80 ? "bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.3)]" : p >= 50 ? "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]" : "bg-rose-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]"}`}
+                                style={{ width: `${p}%` }}
+                              />
+                            </div>
+
+                            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-tight text-slate-500">
+                              <span className="flex items-center gap-1.5 whitespace-nowrap">
+                                {res.score}/{res.totalQuestions} Correct
+                              </span>
+                              <span className="flex items-center gap-1 whitespace-nowrap">
+                                <Calendar className="w-3 h-3" />
+                                {new Date(res.submittedAt).toLocaleDateString()}
+                              </span>
+                            </div>
+
+                            <div className="pt-2 flex justify-between items-center">
+                              <button 
+                                onClick={() => window.location.href = `/result/${res.id}`}
+                                className="flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
+                              >
+                                View Detailed
+                                <ChevronRight className="w-3 h-3" />
+                              </button>
+                              <button 
+                                 onClick={(e) => handleDeleteResult(res.id as string, e)}
+                                 className="p-1.5 text-slate-500 hover:text-rose-500 hover:bg-rose-500/10 rounded transition-colors"
+                                 title="Delete Record"
+                              >
+                                 <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </section>
         </>
       )}
