@@ -128,9 +128,6 @@ export default function StudentPortal() {
                 );
               })}
             </div>
-            {/* Scroll gradients */}
-            <div className="absolute top-0 left-0 w-8 h-full bg-gradient-to-r from-[#0a0c10] to-transparent pointer-events-none opacity-0 group-hover/carousel:opacity-100 transition-opacity" />
-            <div className="absolute top-0 right-0 w-8 h-full bg-gradient-to-l from-[#0a0c10] to-transparent pointer-events-none opacity-0 group-hover/carousel:opacity-100 transition-opacity" />
           </div>
         )}
       </section>
@@ -207,9 +204,6 @@ export default function StudentPortal() {
                 );
               })}
             </div>
-            {/* Scroll gradients */}
-            <div className="absolute top-0 left-0 w-8 h-full bg-gradient-to-r from-[#0a0c10] to-transparent pointer-events-none opacity-0 group-hover/carousel-results:opacity-100 transition-opacity" />
-            <div className="absolute top-0 right-0 w-8 h-full bg-gradient-to-l from-[#0a0c10] to-transparent pointer-events-none opacity-0 group-hover/carousel-results:opacity-100 transition-opacity" />
           </div>
         )}
       </section>
