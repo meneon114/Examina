@@ -20,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen relative`} suppressHydrationWarning>
+        <script dangerouslySetInnerHTML={{ __html: `window.history.scrollRestoration = "manual"` }} />
         {/* Dynamic Background Elements */}
         <div className="bg-mesh" aria-hidden="true" />
         <div className="bg-dot-pattern" aria-hidden="true" />

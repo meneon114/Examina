@@ -20,8 +20,8 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-4 z-50 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-      <div className="glass-panel px-6 py-3 mt-4">
+    <nav className="sticky top-0 z-50 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-4">
+      <div className="glass-panel px-6 py-3">
         <div className="flex justify-between items-center h-10">
           {/* Default Content: SHOWN OUTSIDE EXAM PAGE or if NO DATA */}
           {(!isExamPage || !headerData) && (

@@ -27,11 +27,61 @@ export default function ExamClient({ exam }: { exam: Exam }) {
   const { user } = useAuth();
   const { setHeaderData } = useExamHeader();
   const router = useRouter();
+  const duration = exam.questions.length * 60; // 60s per question
+  const storageKeyPrefix = `examina_exam_${exam.id}_${user?.email}`;
+  const startTimeKey = `${storageKeyPrefix}_start`;
+  const answersKey = `${storageKeyPrefix}_answers`;
+
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [explanations, setExplanations] = useState<Record<string, ExplanationState>>({});
-  const [timeLeft, setTimeLeft] = useState(exam.questions.length * 60);
+  const [timeLeft, setTimeLeft] = useState(duration);
+
+  // ── Restore State ──
+  useEffect(() => {
+    if (!user?.email) return;
+
+    // Restore answers
+    const savedAnswers = localStorage.getItem(answersKey);
+    if (savedAnswers) {
+      try {
+        setAnswers(JSON.parse(savedAnswers));
+      } catch (e) {
+        console.error("Failed to parse saved answers", e);
+      }
+    }
+
+    // Restore timer logic
+    let startTimeStr = localStorage.getItem(startTimeKey);
+    let startTime: number;
+
+    if (!startTimeStr) {
+      startTime = Date.now();
+      localStorage.setItem(startTimeKey, startTime.toString());
+    } else {
+      startTime = parseInt(startTimeStr);
+    }
+
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const remaining = Math.max(0, duration - elapsed);
+    
+    setTimeLeft(remaining);
+    
+    // Check if it's already over
+    if (remaining === 0 && !isSubmitted) {
+      // Just to ensure we have the most up-to-date answers for immediate submission
+      const latestAnswers = savedAnswers ? JSON.parse(savedAnswers) : {};
+      handleAutoSubmit(latestAnswers);
+    }
+  }, [user?.email, exam.id]);
+
+  // ── Sync Answers ──
+  useEffect(() => {
+    if (Object.keys(answers).length > 0 && !isSubmitted) {
+      localStorage.setItem(answersKey, JSON.stringify(answers));
+    }
+  }, [answers, isSubmitted]);
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -41,8 +91,6 @@ export default function ExamClient({ exam }: { exam: Exam }) {
     scrollMargin: parentRef.current?.offsetTop ?? 0,
     overscan: 5,
   });
-
-
 
   const handleOptionSelect = (qId: string | number, option: string) => {
     if (isSubmitted) return;
@@ -107,6 +155,38 @@ export default function ExamClient({ exam }: { exam: Exam }) {
     return () => setHeaderData(null);
   }, [timeLeft, answeredCount, isSubmitted, exam, setHeaderData]);
 
+  // Special handler for immediate submission if timer was already up
+  const handleAutoSubmit = async (activeAnswers: Record<string, string>) => {
+    if (isSubmitted) return;
+    let currentScore = 0;
+    exam.questions.forEach((q) => {
+      if (activeAnswers[String(q.id)] === q.correctAnswer) currentScore += 1;
+    });
+    setScore(currentScore);
+    setIsSubmitted(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    
+    // Clear storage
+    localStorage.removeItem(startTimeKey);
+    localStorage.removeItem(answersKey);
+
+    if (user?.email) {
+      try {
+        await saveExamResult({
+          examId: exam.id,
+          examTitle: exam.examTitle,
+          studentEmail: user.email,
+          score: currentScore,
+          totalQuestions: exam.questions.length,
+          submittedAt: Date.now(),
+          studentAnswers: activeAnswers,
+        });
+      } catch (err) {
+        console.error("Failed to save result", err);
+      }
+    }
+  };
+
   const handleSubmit = async () => {
     if (isSubmitted) return;
     let currentScore = 0;
@@ -116,6 +196,10 @@ export default function ExamClient({ exam }: { exam: Exam }) {
     setScore(currentScore);
     setIsSubmitted(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Clear storage
+    localStorage.removeItem(startTimeKey);
+    localStorage.removeItem(answersKey);
 
     if (user?.email) {
       try {
