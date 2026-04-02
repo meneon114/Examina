@@ -1,9 +1,10 @@
 import { db } from "./firebase";
-import { collection, addDoc, getDocs, doc, getDoc, query, where, orderBy, deleteDoc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, getDoc, query, where, orderBy, deleteDoc, updateDoc, setDoc } from "firebase/firestore";
 import { Exam, ExamResult } from "./types";
 
 const EXAMS_COLLECTION = "exams";
 const RESULTS_COLLECTION = "results";
+const EXPLANATIONS_COLLECTION = "explanations";
 
 export async function saveExam(examData: Omit<Exam, "id">): Promise<string> {
   const docRef = await addDoc(collection(db, EXAMS_COLLECTION), examData);
@@ -78,4 +79,29 @@ export async function getResultById(id: string): Promise<ExamResult | null> {
 
 export async function deleteResult(id: string): Promise<void> {
   await deleteDoc(doc(db, RESULTS_COLLECTION, id));
+}
+
+export async function getExplanationFromCache(questionText: string, correctAnswer: string): Promise<string | null> {
+  const hash = await generateHash(questionText + correctAnswer);
+  const docRef = doc(db, EXPLANATIONS_COLLECTION, hash);
+  const snapshot = await getDoc(docRef);
+  if (snapshot.exists()) {
+    return (snapshot.data() as any).explanation;
+  }
+  return null;
+}
+
+export async function saveExplanationToCache(questionText: string, correctAnswer: string, explanation: string): Promise<void> {
+  const hash = await generateHash(questionText + correctAnswer);
+  const docRef = doc(db, EXPLANATIONS_COLLECTION, hash);
+  await setDoc(docRef, { questionText, correctAnswer, explanation, createdAt: Date.now() });
+}
+
+async function generateHash(text: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(text);
+  // Using node crypto if available, otherwise global crypto
+  const cryptoImpl = typeof crypto !== 'undefined' ? crypto : (await import('crypto')).webcrypto;
+  const hashBuffer = await cryptoImpl.subtle.digest("SHA-256", msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 }

@@ -12,9 +12,14 @@ import {
   Loader2,
   Clock,
   ChevronRight,
+  ArrowUp,
+  Home
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import clsx from "clsx";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { useRef, useMemo } from "react";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { useExamHeader } from "./ExamHeaderContext";
 
@@ -23,11 +28,28 @@ type ExplanationState = { text: string; loading: boolean; error?: string };
 export default function ExamClient({ exam }: { exam: Exam }) {
   const { user } = useAuth();
   const { setHeaderData } = useExamHeader();
+  const router = useRouter();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [explanations, setExplanations] = useState<Record<string, ExplanationState>>({});
   const [timeLeft, setTimeLeft] = useState(exam.questions.length * 60);
+  const [showGoTop, setShowGoTop] = useState(false);
+
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useWindowVirtualizer({
+    count: exam.questions.length,
+    estimateSize: () => 350,
+    scrollMargin: parentRef.current?.offsetTop ?? 0,
+    overscan: 5,
+  });
+
+  useEffect(() => {
+    const handleScroll = () => setShowGoTop(window.scrollY > 500);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleOptionSelect = (qId: string | number, option: string) => {
     if (isSubmitted) return;
@@ -160,134 +182,153 @@ export default function ExamClient({ exam }: { exam: Exam }) {
         </div>
       )}
 
-      {/* ── Questions ── */}
-      <div className="space-y-6">
-        {exam.questions.map((q, idx) => {
+      {/* ── Questions (Virtualized) ── */}
+      <div 
+        ref={parentRef} 
+        style={{ 
+          height: `${virtualizer.getTotalSize()}px`, 
+          width: '100%', 
+          position: 'relative' 
+        }}
+      >
+        {virtualizer.getVirtualItems().map((virtualRow) => {
+          const q = exam.questions[virtualRow.index];
           const qId = String(q.id);
           const selectedAnswer = answers[qId];
           const explanation = explanations[qId];
 
           return (
-            <div key={qId} className="card overflow-hidden">
-              <div className="p-5 sm:p-6">
-                <div className="flex flex-col gap-5">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-base sm:text-lg font-bold text-white mb-6 leading-relaxed flex gap-3">
-                      <span className="text-indigo-400 opacity-60 shrink-0">Q{idx + 1}.</span>
-                      <MarkdownRenderer content={q.questionText} />
-                    </div>
-
-                    {/* Question image */}
-                    {q.imageUrl && (
-                      <div className="mb-5 rounded-xl overflow-hidden border border-[#2e3146] bg-[#252838] flex justify-center p-3">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={q.imageUrl}
-                          alt={`Question ${idx + 1} image`}
-                          className="max-w-full h-auto max-h-72 object-contain rounded-lg"
-                        />
+            <div
+              key={virtualRow.key}
+              data-index={virtualRow.index}
+              ref={virtualizer.measureElement}
+              className="absolute top-0 left-0 w-full"
+              style={{
+                transform: `translateY(${virtualRow.start - virtualizer.options.scrollMargin}px)`,
+                paddingBottom: '24px' // Gap between cards
+              }}
+            >
+              <div className="card overflow-hidden">
+                <div className="p-5 sm:p-6">
+                  <div className="flex flex-col gap-5">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-base sm:text-lg font-bold text-white mb-6 leading-relaxed flex gap-3">
+                        <span className="text-indigo-400 opacity-60 shrink-0">Q{virtualRow.index + 1}.</span>
+                        <MarkdownRenderer content={q.questionText} />
                       </div>
-                    )}
 
-                    {/* Options */}
-                    <div className="space-y-2.5">
-                      {q.options.map((opt, oIdx) => {
-                        let state = "default";
-                        if (isSubmitted) {
-                          if (opt === q.correctAnswer) state = "correct";
-                          else if (opt === selectedAnswer && selectedAnswer !== q.correctAnswer)
-                            state = "incorrect";
-                        } else if (opt === selectedAnswer) {
-                          state = "selected";
-                        }
+                      {/* Question image */}
+                      {q.imageUrl && (
+                        <div className="mb-5 rounded-xl overflow-hidden border border-[#2e3146] bg-[#252838] flex justify-center p-3">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={q.imageUrl}
+                            alt={`Question ${virtualRow.index + 1} image`}
+                            className="max-w-full h-auto max-h-72 object-contain rounded-lg"
+                          />
+                        </div>
+                      )}
 
-                        return (
-                          <label
-                            key={oIdx}
-                            className={clsx(
-                              "flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 group/opt",
-                              {
-                                "border-white/5 bg-slate-900/30 hover:border-indigo-500/30 hover:bg-indigo-500/5":
-                                  state === "default" && !isSubmitted,
-                                "border-white/5 bg-slate-900/10 opacity-60 cursor-not-allowed":
-                                  state === "default" && isSubmitted,
-                                "border-indigo-500/50 bg-indigo-500/10 shadow-[0_0_15px_rgba(99,102,241,0.1)]":
-                                  state === "selected",
-                                "border-emerald-500/50 bg-emerald-500/10":
-                                  state === "correct",
-                                "border-rose-500/50 bg-rose-500/10":
-                                  state === "incorrect",
-                              }
-                            )}
-                          >
-                            <input
-                              type="radio"
-                              name={qId}
-                              value={opt}
-                              checked={selectedAnswer === opt}
-                              onChange={() => handleOptionSelect(qId, opt)}
-                              disabled={isSubmitted}
-                              className="w-4 h-4 accent-[#6366f1] flex-shrink-0"
-                            />
-                            <div
-                              className={clsx("flex-1 text-sm font-bold tracking-tight transition-colors", {
-                                "text-slate-400 group-hover/opt:text-slate-200": state === "default",
-                                "text-indigo-300": state === "selected",
-                                "text-emerald-400": state === "correct",
-                                "text-rose-400": state === "incorrect",
-                              })}
+                      {/* Options */}
+                      <div className="space-y-2.5">
+                        {q.options.map((opt, oIdx) => {
+                          let state = "default";
+                          if (isSubmitted) {
+                            if (opt === q.correctAnswer) state = "correct";
+                            else if (opt === selectedAnswer && selectedAnswer !== q.correctAnswer)
+                              state = "incorrect";
+                          } else if (opt === selectedAnswer) {
+                            state = "selected";
+                          }
+
+                          return (
+                            <label
+                              key={oIdx}
+                              className={clsx(
+                                "flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 group/opt",
+                                {
+                                  "border-white/5 bg-slate-900/30 hover:border-indigo-500/30 hover:bg-indigo-500/5":
+                                    state === "default" && !isSubmitted,
+                                  "border-white/5 bg-slate-900/10 opacity-60 cursor-not-allowed":
+                                    state === "default" && isSubmitted,
+                                  "border-indigo-500/50 bg-indigo-500/10 shadow-[0_0_15px_rgba(99,102,241,0.1)]":
+                                    state === "selected",
+                                  "border-emerald-500/50 bg-emerald-500/10":
+                                    state === "correct",
+                                  "border-rose-500/50 bg-rose-500/10":
+                                    state === "incorrect",
+                                }
+                              )}
                             >
-                              <MarkdownRenderer content={opt} />
-                            </div>
-                            {state === "correct" && <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />}
-                            {state === "incorrect" && <XCircle className="w-5 h-5 text-rose-400 shrink-0" />}
-                          </label>
-                        );
-                      })}
+                              <input
+                                type="radio"
+                                name={qId}
+                                value={opt}
+                                checked={selectedAnswer === opt}
+                                onChange={() => handleOptionSelect(qId, opt)}
+                                disabled={isSubmitted}
+                                className="w-4 h-4 accent-[#6366f1] flex-shrink-0"
+                              />
+                              <div
+                                className={clsx("flex-1 text-sm font-bold tracking-tight transition-colors", {
+                                  "text-slate-400 group-hover/opt:text-slate-200": state === "default",
+                                  "text-indigo-300": state === "selected",
+                                  "text-emerald-400": state === "correct",
+                                  "text-rose-400": state === "incorrect",
+                                })}
+                              >
+                                <MarkdownRenderer content={opt} />
+                              </div>
+                              {state === "correct" && <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />}
+                              {state === "incorrect" && <XCircle className="w-5 h-5 text-rose-400 shrink-0" />}
+                            </label>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* ── Explain section ── */}
-                {isSubmitted && (
-                  <div className="mt-8 pt-8 border-t border-white/5">
-                    {!explanation?.text && !explanation?.loading && (
-                      <button
-                        onClick={() => handleExplain(qId, q.questionText, q.correctAnswer)}
-                        className="btn-secondary text-[11px] font-black uppercase tracking-widest text-amber-400 border-amber-400/20 bg-amber-400/5 hover:bg-amber-400/10"
-                      >
-                        <Lightbulb className="w-3.5 h-3.5" />
-                        Explanation
-                      </button>
-                    )}
-
-                    {explanation?.loading && (
-                      <div className="flex items-center gap-2.5 text-sm text-[#8b90a8] animate-pulse-soft">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Loading explanation…
-                      </div>
-                    )}
-
-                    {explanation?.error && (
-                      <p className="text-sm text-[#f87171] bg-[#f87171]/8 border border-[#f87171]/20 p-3 rounded-lg">
-                        Something went wrong. Please try again.
-                      </p>
-                    )}
-
-                    {explanation?.text && (
-                      <div className="bg-slate-900/40 border border-amber-500/20 rounded-2xl p-6 relative overflow-hidden mt-4">
-                        <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500/40" />
-                        <div className="flex items-center gap-2 mb-4 text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">
-                          <Lightbulb className="w-3 h-3" />
+                  {/* ── Explain section ── */}
+                  {isSubmitted && (
+                    <div className="mt-8 pt-8 border-t border-white/5">
+                      {!explanation?.text && !explanation?.loading && (
+                        <button
+                          onClick={() => handleExplain(qId, q.questionText, q.correctAnswer)}
+                          className="btn-secondary text-[11px] font-black uppercase tracking-widest text-amber-400 border-amber-400/20 bg-amber-400/5 hover:bg-amber-400/10"
+                        >
+                          <Lightbulb className="w-3.5 h-3.5" />
                           Explanation
+                        </button>
+                      )}
+
+                      {explanation?.loading && (
+                        <div className="flex items-center gap-2.5 text-sm text-[#8b90a8] animate-pulse-soft">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Loading explanation…
                         </div>
-                        <div className="text-[#c8ccd8] text-sm leading-relaxed pl-1">
-                          <MarkdownRenderer content={explanation.text} />
+                      )}
+
+                      {explanation?.error && (
+                        <p className="text-sm text-[#f87171] bg-[#f87171]/8 border border-[#f87171]/20 p-3 rounded-lg">
+                          Something went wrong. Please try again.
+                        </p>
+                      )}
+
+                      {explanation?.text && (
+                        <div className="bg-slate-900/40 border border-amber-500/20 rounded-2xl p-6 relative overflow-hidden mt-4">
+                          <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500/40" />
+                          <div className="flex items-center gap-2 mb-4 text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                            <Lightbulb className="w-3 h-3" />
+                            Explanation
+                          </div>
+                          <div className="text-[#c8ccd8] text-sm leading-relaxed pl-1">
+                            <MarkdownRenderer content={explanation.text} />
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           );
@@ -296,18 +337,32 @@ export default function ExamClient({ exam }: { exam: Exam }) {
 
         <div className="mt-12 flex flex-col items-center gap-4">
           <button
-            onClick={handleSubmit}
-            className="btn-primary w-full sm:w-auto px-12 py-4 text-lg shadow-indigo-500/40"
+            onClick={isSubmitted ? () => router.push("/") : handleSubmit}
+            className={clsx(
+              "btn-primary w-full sm:w-auto px-12 py-4 text-lg shadow-indigo-500/40 transition-all",
+              isSubmitted && "bg-slate-800 hover:bg-slate-700 hover:shadow-none translate-y-0"
+            )}
           >
-            Finish Exam
-            <CheckCircle2 className="w-5 h-5 ml-1" />
+            {isSubmitted ? "Return to Home" : "Finish Exam"}
+            {isSubmitted ? <Home className="w-5 h-5 ml-1" /> : <CheckCircle2 className="w-5 h-5 ml-1" />}
           </button>
-          {!isComplete && (
+          {!isComplete && !isSubmitted && (
             <p className="text-slate-500 text-xs font-bold uppercase tracking-widest animate-pulse-soft">
               You've skipped {exam.questions.length - answeredCount} questions. You can finish anyway!
             </p>
           )}
         </div>
+
+      {/* Floating Go to Top Button */}
+      {showGoTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-indigo-600 text-white shadow-2xl flex items-center justify-center hover:bg-indigo-500 transition-all animate-reveal z-50 ring-4 ring-indigo-500/20"
+          aria-label="Go to top"
+        >
+          <ArrowUp className="w-6 h-6" />
+        </button>
+      )}
     </div>
   );
 }

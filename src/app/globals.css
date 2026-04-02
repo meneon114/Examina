@@ -150,3 +150,20 @@ body {
 .animate-slide-in {
   animation: slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ── Custom Utilities ────────────────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* ── Carousels ─────────────────────────────────────────── */
+.snap-x {
+  scroll-snap-type: x mandatory;
+}
+.snap-start {
+  scroll-snap-align: start;
+}

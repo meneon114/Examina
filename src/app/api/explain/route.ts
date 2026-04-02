@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
+import { getExplanationFromCache, saveExplanationToCache } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,6 +8,17 @@ export async function POST(req: NextRequest) {
 
     if (!questionText || !correctAnswer) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+    }
+
+    // Check cache first
+    try {
+      const cached = await getExplanationFromCache(questionText, correctAnswer);
+      if (cached) {
+        console.log("Returning cached explanation.");
+        return NextResponse.json({ explanation: cached });
+      }
+    } catch (cacheError) {
+      console.warn("Cache Retrieval Error (skipping cache):", cacheError);
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -27,7 +39,16 @@ export async function POST(req: NextRequest) {
       throw new Error("No explanation generated from AI.");
     }
 
-    return NextResponse.json({ explanation: response.text });
+    const explanation = response.text;
+
+    // Cache the new explanation
+    try {
+      await saveExplanationToCache(questionText, correctAnswer, explanation);
+    } catch (cacheSaveError) {
+      console.warn("Cache Save Error (skipping cache):", cacheSaveError);
+    }
+
+    return NextResponse.json({ explanation });
   } catch (error: any) {
     console.error("Gemini API Error:", error);
     return NextResponse.json(
