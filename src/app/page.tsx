@@ -35,21 +35,10 @@ export default function Home() {
           Sign in to access your dashboard.
         </p>
 
-        {/* Credit */}
-        <p className="text-[#555a72] text-sm">
-          Built by{" "}
-          <a
-            href="https://github.com/meneon114"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#8b90a8] transition-colors underline underline-offset-4"
-          >
-            Md. Rijun Islam Neon
-          </a>
-        </p>
       </div>
     );
   }
+
 
   if (role === "teacher") {
     return <TeacherPortal />;
