@@ -27,7 +27,7 @@ export default function ExamClient({ exam }: { exam: Exam }) {
   const { user } = useAuth();
   const { setHeaderData } = useExamHeader();
   const router = useRouter();
-  const duration = exam.questions.length * 60; // 60s per question
+  const duration = (exam.duration || exam.questions.length) * 60; // duration in minutes * 60 or 60s per question
   const storageKeyPrefix = `examina_exam_${exam.id}_${user?.email}`;
   const startTimeKey = `${storageKeyPrefix}_start`;
   const answersKey = `${storageKeyPrefix}_answers`;

@@ -9,6 +9,7 @@ import { FileUp, Save, X, PlusCircle, Trash2, Edit, Activity, User, Award, Calen
 const getEmptyExam = (email: string): Omit<Exam, "id"> => ({
   examTitle: "",
   examDescription: "",
+  duration: 60, // Default 1 hour
   questions: [],
   creatorEmail: email,
   createdAt: Date.now()
@@ -99,6 +100,7 @@ export default function TeacherPortal() {
     const cleanJson = {
       examTitle: exam.examTitle,
       examDescription: exam.examDescription,
+      duration: exam.duration || 60,
       questions: exam.questions || [],
       creatorEmail: exam.creatorEmail,
       createdAt: exam.createdAt
@@ -147,6 +149,7 @@ export default function TeacherPortal() {
         if (!parsed.questions) parsed.questions = [];
         if (!parsed.creatorEmail) parsed.creatorEmail = user!.email!;
         if (!parsed.createdAt) parsed.createdAt = Date.now();
+        if (!parsed.duration) parsed.duration = 60;
         setExamData(parsed);
       } catch (err) {
         setJsonError("Invalid JSON format in file.");
@@ -282,19 +285,38 @@ export default function TeacherPortal() {
                 <div>
                   <label className="block text-xs font-black text-slate-500 mb-3 uppercase tracking-[0.2em]">Exam Identity</label>
                   <div className="space-y-4">
-                    <input 
-                      type="text" 
-                      className="w-full bg-slate-900/50 text-white border border-white/5 rounded-xl p-4 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all placeholder:text-slate-600 font-medium"
-                      value={examData.examTitle}
-                      onChange={(e) => handleExamFieldChange("examTitle", e.target.value)}
-                      placeholder="e.g. Advanced Quantum Mechanics"
-                    />
-                    <textarea 
-                      className="w-full bg-slate-900/50 text-white border border-white/5 rounded-xl p-4 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all h-32 placeholder:text-slate-600 font-medium resize-none"
-                      value={examData.examDescription}
-                      onChange={(e) => handleExamFieldChange("examDescription", e.target.value)}
-                      placeholder="Provide brief instructions or context for the assessment..."
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="flex-1">
+                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest ml-1">Title</label>
+                        <input 
+                          type="text" 
+                          className="w-full bg-slate-900/50 text-white border border-white/5 rounded-xl p-4 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all placeholder:text-slate-600 font-medium"
+                          value={examData.examTitle}
+                          onChange={(e) => handleExamFieldChange("examTitle", e.target.value)}
+                          placeholder="e.g. Advanced Quantum Mechanics"
+                        />
+                      </div>
+                      <div className="w-full sm:w-48">
+                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest ml-1">Duration (Min)</label>
+                        <input 
+                          type="number" 
+                          className="w-full bg-slate-900/50 text-white border border-white/5 rounded-xl p-4 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all placeholder:text-slate-600 font-medium"
+                          value={examData.duration || ""}
+                          onChange={(e) => handleExamFieldChange("duration", parseInt(e.target.value) || 0)}
+                          placeholder="Minutes"
+                          min="1"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest ml-1">Description</label>
+                      <textarea 
+                        className="w-full bg-slate-900/50 text-white border border-white/5 rounded-xl p-4 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all h-32 placeholder:text-slate-600 font-medium resize-none"
+                        value={examData.examDescription}
+                        onChange={(e) => handleExamFieldChange("examDescription", e.target.value)}
+                        placeholder="Provide brief instructions or context for the assessment..."
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -503,9 +525,16 @@ export default function TeacherPortal() {
                         </div>
 
                         <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                          <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-slate-900/50 text-slate-400 border border-white/5">
-                            {exam.questions.length} Questions
-                          </span>
+                          <div className="flex gap-2">
+                            <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-slate-900/50 text-slate-400 border border-white/5">
+                              {exam.questions.length} Qs
+                            </span>
+                            {exam.duration && (
+                              <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-indigo-500/5 text-indigo-400 border border-indigo-500/10">
+                                {exam.duration} Min
+                              </span>
+                            )}
+                          </div>
                           <span className="text-[10px] text-slate-500 font-medium">
                             {new Date(exam.createdAt).toLocaleDateString()}
                           </span>

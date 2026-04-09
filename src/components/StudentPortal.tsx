@@ -107,9 +107,16 @@ export default function StudentPortal() {
                           )}>
                             {isDone ? "Completed" : "Exam"}
                           </div>
-                          <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-slate-900/50 text-slate-400 border border-white/5">
-                            {exam.questions.length} Questions
-                          </span>
+                          <div className="flex gap-2">
+                            <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-slate-900/50 text-slate-400 border border-white/5">
+                              {exam.questions.length} Qs
+                            </span>
+                            {exam.duration && (
+                              <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-indigo-500/5 text-indigo-400 border border-indigo-500/10">
+                                {exam.duration} Min
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <h3 className="text-lg font-bold text-white transition-colors mb-2 leading-tight">
                           {exam.examTitle}
